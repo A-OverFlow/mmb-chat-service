@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: demo-app:local
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: ./gradlew bootRun
+    networks:
+      - external-net
+
+networks:
+  external-net:
+    external: true
+    name: my-external-network

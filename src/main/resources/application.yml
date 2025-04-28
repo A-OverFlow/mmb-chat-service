@@ -1,0 +1,27 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  web:
+    resources:
+      static-locations: classpath:/static/
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:demo_db}?allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USERNAME:demo_user}
+    password: ${DB_PASSWORD:demo_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}  # ?? ? validate ?? none ??
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${JPA_FORMAT_SQL:true}
+        dialect: org.hibernate.dialect.MariaDBDialect
+
+logging:
+  level:
+    root: ${LOG_ROOT_LEVEL:info}
+    org.springframework.web: ${LOG_WEB_LEVEL:debug}
+    com.mumulbo.msaplayground: ${LOG_APP_LEVEL:debug}  # ???? ??? ??
