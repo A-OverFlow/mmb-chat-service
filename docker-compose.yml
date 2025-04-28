@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${SERVER_PORT:-8080}:8080"
+      - "${SERVICE_PORT}:8080"
     networks:
       - external-net
     depends_on:
@@ -24,7 +24,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
