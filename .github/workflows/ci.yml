@@ -4,11 +4,11 @@ name: DEV CI - Build & Test
 on:
   # dev 브랜치로 Pull Request 생성 또는 업데이트 시 실행
   pull_request:
-    branches: [ dev ]
+    branches: [ develop ]
 
   # dev 브랜치로 직접 Push될 때도 실행
   push:
-    branches: [ dev ]
+    branches: [ develop ]
 
 jobs:
   build:
