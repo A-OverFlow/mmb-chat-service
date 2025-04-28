@@ -44,7 +44,7 @@ jobs:
           context: .               # 빌드 컨텍스트 (현재 디렉토리)
           file: Dockerfile          # 사용할 Dockerfile
           push: true                # 빌드 후 이미지 푸시
-          tags: mumulbo/sample-service:dev  # 이미지 태그 설정
+          tags: mumulbo/mmb-ms-msa-playground:dev  # 이미지 태그 설정
 
       - name: EC2 서버에 배포 디렉토리 생성
         run: |
