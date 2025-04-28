@@ -4,7 +4,7 @@ name: DEV CD - Deploy to EC2
 on:
   # dev 브랜치에 Push 발생 시 실행
   push:
-    branches: [ dev ]
+    branches: [ develop ]
 
 jobs:
   deploy-dev:
