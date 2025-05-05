@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mumulbo/mmb-ms-msa-playground:dev
+    image: mumulbo/mmb-ms-msa-playground:IMAGE_TAG_PLACEHOLDER
     env_file:
       - .env
     ports:
