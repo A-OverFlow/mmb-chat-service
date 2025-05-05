@@ -6,7 +6,7 @@ spring:
     resources:
       static-locations: classpath:/static/
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3308}/${DB_NAME:sample_db}?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://${DB_HOST:localhost}:${CONTAINER_DB_PORT:3308}/${DB_NAME:sample_db}?allowPublicKeyRetrieval=true&useSSL=false
     username: ${DB_USERNAME:sample_user}
     password: ${DB_PASSWORD:sample_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
