@@ -32,6 +32,12 @@ jobs:
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT  # 저장소 이름 추출
           echo "DEPLOY_DIR=${{ secrets.DEV_DEPLOY_PATH }}/${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT  # 배포 경로 설정
 
+      - name: 이미지 태그 생성 (ex:dev-20240505-abc1234)
+        id: tagger
+        run: |
+          TAG="dev-$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_OUTPUT
+
       - name: Docker Hub 로그인
         uses: docker/login-action@v3
         with:
@@ -44,7 +50,7 @@ jobs:
           context: .               # 빌드 컨텍스트 (현재 디렉토리)
           file: Dockerfile          # 사용할 Dockerfile
           push: true                # 빌드 후 이미지 푸시
-          tags: mumulbo/mmb-ms-msa-playground:dev  # 이미지 태그 설정
+          tags: mumulbo/mmb-ms-msa-playground:${{ steps.tagger.outputs.IMAGE_TAG }}  # 이미지 태그 설정
 
       - name: EC2 서버에 배포 디렉토리 생성
         run: |
@@ -79,4 +85,14 @@ jobs:
             cd ${{ steps.vars.outputs.DEPLOY_DIR }}
             docker compose pull    # 최신 이미지를 가져옴
             docker compose up -d   # 컨테이너를 백그라운드로 실행
+          EOF
+
+      - name: EC2 서버에서 오래된 Docker 이미지 정리 (최신 10개만 보존)
+        run: |
+          ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << 'EOF'
+            docker images --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}}' \
+              | grep 'mumulbo/mmb-ms-msa-playground:dev-' \
+              | sort -r \
+              | awk 'NR > 10 { print $1 }' \
+              | xargs -r docker rmi
           EOF
