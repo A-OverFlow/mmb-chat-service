@@ -52,6 +52,10 @@ jobs:
           push: true                # 빌드 후 이미지 푸시
           tags: mumulbo/mmb-ms-msa-playground:${{ steps.tagger.outputs.IMAGE_TAG }}  # 이미지 태그 설정
 
+      - name: docker-compose.yml에 이미지 태그 반영
+        run: |
+          sed "s|IMAGE_TAG_PLACEHOLDER|${{ steps.tagger.outputs.IMAGE_TAG }}|g" docker-compose.yml > docker-compose.generated.yml
+
       - name: EC2 서버에 배포 디렉토리 생성
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} \
@@ -59,7 +63,7 @@ jobs:
 
       - name: docker-compose.yml 파일 EC2 서버로 복사
         run: |
-          scp -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no docker-compose.yml \
+          scp -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no docker-compose.generated.yml \
           ${{ secrets.DEV_EC2_HOST }}:${{ steps.vars.outputs.DEPLOY_DIR }}/docker-compose.yml
 
       - name: 배포에 필요한 .env 파일 생성
@@ -83,7 +87,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << EOF
             cd ${{ steps.vars.outputs.DEPLOY_DIR }}
-            docker compose pull    # 최신 이미지를 가져옴
             docker compose up -d   # 컨테이너를 백그라운드로 실행
           EOF
 
