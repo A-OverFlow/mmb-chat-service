@@ -9,7 +9,9 @@ services:
     env_file:
       - .env
     ports:
-      - "${SERVICE_PORT}:8080"
+      - "${SERVER_PORT}:8080"
+    volumes:
+      - /home/ec2-user/deploy/mmb-ms-msa-playground/logs:/app/logs
     networks:
       - external-net
     depends_on:
