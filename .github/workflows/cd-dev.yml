@@ -58,7 +58,7 @@ jobs:
 
       - name: 배포에 필요한 .env 파일 생성
         run: |
-          echo "SERVER_PORT=${{ vars.SERVER_PORT }}" > .env
+          echo "SERVICE_PORT=${{ vars.SERVICE_PORT }}" > .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
           echo "HOST_DB_PORT=${{ vars.HOST_DB_PORT }}" >> .env
