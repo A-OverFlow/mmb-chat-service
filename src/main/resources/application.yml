@@ -23,5 +23,9 @@ spring:
 logging:
   level:
     root: ${LOG_ROOT_LEVEL:info}
-    org.springframework.web: ${LOG_WEB_LEVEL:debug}
-    com.mumulbo.msaplayground: ${LOG_APP_LEVEL:debug}  # ???? ??? ??
+    org.springframework.web: ${LOG_WEB_LEVEL:debug}     # Spring 내부 로그 줄이기
+    com.mumulbo: ${LOG_APP_LEVEL:debug}                # 내 애플리케이션 패키지만 DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name:   # 파일 로그 비활성화 (없애도 무방)
