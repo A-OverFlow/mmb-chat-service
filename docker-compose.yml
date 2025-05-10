@@ -10,12 +10,15 @@ services:
       - .env
     ports:
       - "${SERVICE_PORT}:8084"
-    volumes:
-      - /home/ec2-user/deploy/mmb-ms-msa-playground/logs:/app/logs
     networks:
       - external-net
     depends_on:
       - db
+    logging:
+      driver: json-file
+      options:
+          max-size: "10m"
+          max-file: "5"
 
   db:
     image: mysql:8.0
