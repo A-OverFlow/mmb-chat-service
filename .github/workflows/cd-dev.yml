@@ -10,7 +10,7 @@ jobs:
   deploy-dev:
     # 사용할 머신 환경 - 최신 Ubuntu LTS
     runs-on: ubuntu-latest
-    # 사용할 환경(dev)의 Secrets와 Variables 를 활성화
+    # 사용할 환경(dev)의 Secrets와 Variables 를 활성화.
     environment: dev
 
     steps:
