@@ -1,6 +1,6 @@
 name: DEV CD - Deploy to EC2
 
-# 워크플로우 트리거 조건 설정
+# 워크플로우 트리거 조건 설정.
 on:
   # dev 브랜치에 Push 발생 시 실행
   push:
