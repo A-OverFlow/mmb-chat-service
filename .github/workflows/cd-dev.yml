@@ -32,10 +32,11 @@ jobs:
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT  # 저장소 이름 추출
           echo "DEPLOY_DIR=${{ secrets.DEV_DEPLOY_PATH }}/${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT  # 배포 경로 설정
 
-      - name: 이미지 태그 생성 (ex:dev-20240505-abc1234)
+      - name: Git 태그 기반 이미지 태그 생성
         id: tagger
         run: |
-          TAG="dev-$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          git fetch --tags
+          TAG=$(git describe --tags --match "v[0-9]*" --abbrev=7 2>/dev/null || echo "dev-unknown-${GITHUB_SHA::7}")
           echo "IMAGE_TAG=$TAG" >> $GITHUB_OUTPUT
 
       - name: Docker Hub 로그인
@@ -44,13 +45,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker 이미지 빌드 후 Docker Hub에 푸시
+      - name: Docker 이미지 빌드 및 푸시 (정확한 태그 + dev-latest)
         uses: docker/build-push-action@v5
         with:
-          context: .               # 빌드 컨텍스트 (현재 디렉토리)
-          file: Dockerfile          # 사용할 Dockerfile
-          push: true                # 빌드 후 이미지 푸시
-          tags: mumulbo/mmb-ms-msa-playground:${{ steps.tagger.outputs.IMAGE_TAG }}  # 이미지 태그 설정
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            mumulbo/mmb-ms-msa-playground:${{ steps.tagger.outputs.IMAGE_TAG }}
+            mumulbo/mmb-ms-msa-playground:dev-latest
 
       - name: docker-compose.yml에 이미지 태그 반영
         run: |
@@ -94,7 +97,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << 'EOF'
             docker images --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}}' \
-              | grep 'mumulbo/mmb-ms-msa-playground:dev-' \
+              | grep 'mumulbo/mmb-ms-msa-playground:v' \
               | sort -r \
               | awk 'NR > 10 { print $1 }' \
               | xargs -r docker rmi
