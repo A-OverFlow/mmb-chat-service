@@ -72,6 +72,7 @@ jobs:
 
       - name: 배포에 필요한 .env 파일 생성
         run: |
+          echo "CHAT_SERVICE_NAME=${{ vars.CHAT_SERVICE_NAME }}" > .env
           echo "SERVICE_PORT=${{ vars.SERVICE_PORT }}" > .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
@@ -81,6 +82,10 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
           echo "LOG_PATH=${{ vars.LOG_PATH }}" >> .env
+          echo "MONGO_HOST=${{ vars.MONGO_HOST }}" >> .env
+          echo "MONGO_PORT=${{ vars.MONGO_PORT }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
 
       - name: 생성한 .env 파일 EC2 서버로 복사
         run: |
@@ -90,7 +95,7 @@ jobs:
       - name: EC2 서버에서 docker-compose를 사용해 배포
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << EOF
-            cd ${{ steps.vars.outputs.DEPLOY_DIR }}
+            cd ${{ steps.var`s.outputs.DEPLOY_DIR }}
             docker compose up -d   # 컨테이너를 백그라운드로 실행
           EOF
 

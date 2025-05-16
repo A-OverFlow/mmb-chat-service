@@ -30,6 +30,23 @@ dependencies {
 	implementation(kotlin("stdlib-jdk8"))
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+	// ✅ WebSocket
+	implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+	// ✅ Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	// ✅ MongoDB
+	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+	// ✅ JWT
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+	// ✅ Jackson Kotlin module (선택적으로 JSON 직렬화 용이)
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 
 tasks.withType<Test> {
