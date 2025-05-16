@@ -37,7 +37,7 @@ services:
     image: redis:7.2
     container_name: ${CHAT_SERVICE_NAME}-redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6380:6379"
     deploy:
       resources:
         limits:
