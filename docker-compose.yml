@@ -20,7 +20,7 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: local-mysql
+    container_name: ${CHAT_SERVICE_NAME}-mysql
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USERNAME}
