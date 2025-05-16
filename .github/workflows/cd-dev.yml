@@ -95,7 +95,7 @@ jobs:
       - name: EC2 서버에서 docker-compose를 사용해 배포
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << EOF
-            cd ${{ steps.var`s.outputs.DEPLOY_DIR }}
+            cd ${{ steps.vars.outputs.DEPLOY_DIR }}
             docker compose up -d   # 컨테이너를 백그라운드로 실행
           EOF
 
