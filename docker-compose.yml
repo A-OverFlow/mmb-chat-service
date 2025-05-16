@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: ${CHAT_SERVICE_NAME}
     image: mumulbo/mmb-ms-msa-playground:IMAGE_TAG_PLACEHOLDER
     env_file:
       - .env
