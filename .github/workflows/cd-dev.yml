@@ -96,6 +96,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << EOF
             cd ${{ steps.vars.outputs.DEPLOY_DIR }}
+            docker compose down
             docker compose up -d   # 컨테이너를 백그라운드로 실행
           EOF
 

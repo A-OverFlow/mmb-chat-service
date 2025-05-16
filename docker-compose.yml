@@ -33,7 +33,7 @@ services:
     networks:
       - external-net
 
-  redis:
+  redis-chat:
     image: redis:7.2
     container_name: ${CHAT_SERVICE_NAME}-redis
     ports:
