@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -35,8 +33,37 @@ services:
     networks:
       - external-net
 
+  redis:
+    image: redis:7.2
+    container_name: ${CHAT_SERVICE_NAME}-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    networks:
+      - external-net
+
+  mongo:
+    image: mongo:6.0
+    container_name: ${CHAT_SERVICE_NAME}-mongo
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - mongo_data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    networks:
+      - external-net
+
 volumes:
   mysql_data:
+  mongo_data:
 
 networks:
   external-net:
