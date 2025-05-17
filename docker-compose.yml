@@ -43,7 +43,7 @@ services:
       resources:
         limits:
           memory: 128M
-          cpus: '0.2'
+          cpus: '0.1'
     networks:
       - external-net
 
@@ -57,8 +57,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: '0.5'
+          memory: 128M
+          cpus: '0.1'
     networks:
       - external-net
 
@@ -69,4 +69,4 @@ volumes:
 networks:
   external-net:
     external: true
-    name: sample-network
+    name: mumulbo-network
