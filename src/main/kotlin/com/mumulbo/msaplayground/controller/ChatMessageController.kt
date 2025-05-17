@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/api/v1/chat")
 class ChatMessageController(
     private val chatMessageRepository: ChatMessageRepository
 ) {
