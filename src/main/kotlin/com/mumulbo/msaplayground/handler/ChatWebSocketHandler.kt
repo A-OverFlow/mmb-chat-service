@@ -17,11 +17,11 @@ class ChatWebSocketHandler(
     private val objectMapper = jacksonObjectMapper()
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val token = session.uri?.query?.split("token=")?.getOrNull(1)
-        if (token == null || !validateToken(token)) {
-            session.close(CloseStatus.POLICY_VIOLATION)
-            return
-        }
+//        val token = session.uri?.query?.split("token=")?.getOrNull(1)
+//        if (token == null || !validateToken(token)) {
+//            session.close(CloseStatus.POLICY_VIOLATION)
+//            return
+//        }
 
         println("✅ WebSocket 연결 성공: ${session.id}")
         sessionManager.add(session) // 추가
