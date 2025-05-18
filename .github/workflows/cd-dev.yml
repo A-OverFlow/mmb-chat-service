@@ -86,6 +86,7 @@ jobs:
           echo "MONGO_PORT=${{ vars.MONGO_PORT }}" >> .env
           echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "MMB_DOCKER_NETWORK=${{ vars.MMB_DOCKER_NETWORK }}" >> .env
 
       - name: 생성한 .env 파일 EC2 서버로 복사
         run: |
