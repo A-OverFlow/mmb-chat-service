@@ -1,1 +1,1 @@
-# mmb-ms-msa-playground
+# mmb-chat-service
