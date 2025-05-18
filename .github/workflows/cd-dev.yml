@@ -53,8 +53,8 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            mumulbo/mmb-ms-msa-playground:${{ steps.tagger.outputs.IMAGE_TAG }}
-            mumulbo/mmb-ms-msa-playground:dev-latest
+            mumulbo/mmb-chat-service:${{ steps.tagger.outputs.IMAGE_TAG }}
+            mumulbo/mmb-chat-service:dev-latest
 
       - name: docker-compose.yml에 이미지 태그 반영
         run: |
@@ -104,7 +104,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2.pem -o StrictHostKeyChecking=no ${{ secrets.DEV_EC2_HOST }} << 'EOF'
             docker images --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}}' \
-              | grep 'mumulbo/mmb-ms-msa-playground:v' \
+              | grep 'mumulbo/mmb-chat-service:v' \
               | sort -r \
               | awk 'NR > 10 { print $1 }' \
               | xargs -r docker rmi

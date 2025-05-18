@@ -10,8 +10,3 @@ services:
     command: ./gradlew bootRun
     networks:
       - external-net
-
-networks:
-  external-net:
-    external: true
-    name: my-external-network

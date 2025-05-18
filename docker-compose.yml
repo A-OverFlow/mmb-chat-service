@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: ${CHAT_SERVICE_NAME}
-    image: mumulbo/mmb-ms-msa-playground:IMAGE_TAG_PLACEHOLDER
+    image: mumulbo/mmb-chat-service:IMAGE_TAG_PLACEHOLDER
     env_file:
       - .env
     ports:
@@ -13,6 +13,8 @@ services:
       - external-net
     depends_on:
       - db
+      - mongo
+      - redis-chat
     logging:
       driver: json-file
       options:
@@ -38,7 +40,8 @@ services:
     image: redis:7.2
     container_name: ${CHAT_SERVICE_NAME}-redis
     ports:
-      - "6380:6379"
+      - "6380:6380"
+    command: redis-server --port 6380
     deploy:
       resources:
         limits:
@@ -69,4 +72,4 @@ volumes:
 networks:
   external-net:
     external: true
-    name: mumulbo-network
+    name: ${MMB_DOCKER_NETWORK}
