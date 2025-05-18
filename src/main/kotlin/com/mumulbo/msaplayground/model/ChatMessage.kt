@@ -9,8 +9,8 @@ import java.time.LocalDateTime
 data class ChatMessage(
     @Id
     val id: String? = null,
-    val senderId: String? = null,
-    val senderNickname: String? = null,
+    val senderName: String? = null,
+    val senderEmail: String? = null,
     val message: String,
     val type: MessageType,
     val roomId: String = "main",

@@ -36,7 +36,7 @@ class ChatWebSocketHandler(
 
         try {
             val chatMessage: ChatMessage = objectMapper.readValue(message.payload)
-            // TODO: senderId, nickname은 이후 JWT 인증 정보로 설정
+            // TODO: senderName, senderEmail은 이후 JWT 인증 정보로 설정
             redisPublisher.publish("chat-room:main", chatMessage)
         } catch (e: Exception) {
             println("❌ 메시지 파싱 실패: ${e.message}")
