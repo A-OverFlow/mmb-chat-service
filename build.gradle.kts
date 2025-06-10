@@ -1,5 +1,5 @@
 plugins {
-	id("org.springframework.boot") version "3.4.5"
+	id("org.springframework.boot") version "3.2.5"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("jvm") version "1.9.22"
 	kotlin("plugin.spring") version "1.9.22"
@@ -16,6 +16,7 @@ configurations {
 }
 
 repositories {
+	gradlePluginPortal()
 	mavenCentral()
 }
 
@@ -47,6 +48,15 @@ dependencies {
 
 	// ✅ Jackson Kotlin module (선택적으로 JSON 직렬화 용이)
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+	// ✅ openfeign
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.1")
+	}
 }
 
 tasks.withType<Test> {
