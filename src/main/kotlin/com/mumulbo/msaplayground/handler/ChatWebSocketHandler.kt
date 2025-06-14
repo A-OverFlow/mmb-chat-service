@@ -14,12 +14,15 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 class ChatWebSocketHandler(
     private val redisPublisher: RedisPublisher,
     private val sessionManager: WebSocketSessionManager,
-    private val memberServiceClient: MemberServiceClient, // FeignClient
+    private val memberServiceClient: MemberServiceClient,
 ) : TextWebSocketHandler() {
 
     private val objectMapper = jacksonObjectMapper()
     private val log = logger()
+
     override fun afterConnectionEstablished(session: WebSocketSession) {
+        log.info("[Chat-Service] WebSocket connection attempt - sessionId={}", session.id)
+
         val userId = session.uri.query
             ?.split("&")
             ?.map { it.split("=") }
@@ -27,31 +30,31 @@ class ChatWebSocketHandler(
             ?.get("userId")
 
         if (userId.isNullOrBlank()) {
-            log.warn("❌ X-User-Id 누락")
+            log.warn("[Chat-Service] Missing userId in WebSocket connection - sessionId={}", session.id)
             session.close(CloseStatus.POLICY_VIOLATION)
             return
         }
 
         try {
             val member = memberServiceClient.getMemberInfo(userId.toLong())
-
             session.attributes["nickname"] = member.nickname
             session.attributes["email"] = member.email
 
-            log.info("✅ WebSocket 연결 성공: {} (닉네임: {})", session.id, member.nickname)
+            log.info("[Chat-Service] WebSocket connection established - sessionId={}, nickname={}", session.id, member.nickname)
             sessionManager.add(session)
         } catch (e: Exception) {
-            println("❌ 멤버 정보 조회 실패: ${e.message}")
+            log.error("[Chat-Service] Failed to fetch member info - userId={}, error={}", userId, e.message, e)
             session.close(CloseStatus.SERVER_ERROR)
         }
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        log.info("[Chat-Service] WebSocket connection closed - sessionId={}, status={}", session.id, status)
         sessionManager.remove(session)
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        log.info("📨 받은 메시지: {}", message.payload)
+        log.info("[Chat-Service] Received WebSocket message - sessionId={}, payload={}", session.id, message.payload)
 
         try {
             val chatMessage: ChatMessage = objectMapper.readValue(message.payload)
@@ -60,12 +63,12 @@ class ChatWebSocketHandler(
             chatMessage.senderEmail = session.attributes["email"] as? String ?: "unknown"
 
             redisPublisher.publish("chat-room:main", chatMessage)
+            log.debug("[Chat-Service] Message published to Redis - sender={}, roomId={}", chatMessage.senderName, chatMessage.roomId)
         } catch (e: Exception) {
-            log.error("❌ 메시지 파싱 실패: {}", e.message)
+            log.error("[Chat-Service] Failed to parse incoming message - sessionId={}, error={}", session.id, e.message, e)
         }
     }
 
-    // WebSocketSession에서 헤더 추출하는 유틸 (Spring WebSocket 기본 구현에는 headers 접근자 없음)
     private val WebSocketSession.headers: Map<String, List<String>>
         get() = (attributes["org.springframework.http.HttpHeaders"] as? Map<String, List<String>>)
             ?: emptyMap()

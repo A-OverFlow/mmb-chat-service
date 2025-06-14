@@ -20,19 +20,19 @@ class RedisSubscriber(
 
     override fun onMessage(message: Message, pattern: ByteArray?) {
         val body = String(message.body)
-        log.info("📡 Redis에서 메시지 수신: {}", body)
+        log.info("[Chat-Service] Received message from Redis - payload={}", body)
 
         try {
             val chatMessage = objectMapper.readValue(body, ChatMessage::class.java)
+            log.debug("[Chat-Service] Parsed ChatMessage - sender={}, roomId={}", chatMessage.senderName, chatMessage.roomId)
 
-            // MongoDB 저장
             chatMessageRepository.save(chatMessage)
+            log.debug("[Chat-Service] ChatMessage saved to MongoDB - messageId={}", chatMessage.id)
 
-            // WebSocket 브로드캐스트
             sessionManager.broadcast(body)
-
+            log.debug("[Chat-Service] Broadcasted message to WebSocket clients")
         } catch (e: Exception) {
-            log.error("❌ RedisSubscriber 파싱/저장 실패", e)
+            log.error("[Chat-Service] Failed to process Redis message - error={}", e.message, e)
         }
     }
 }
