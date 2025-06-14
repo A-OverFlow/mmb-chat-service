@@ -2,6 +2,7 @@ package com.mumulbo.msaplayground.handler
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.mumulbo.msaplayground.common.logger
 import com.mumulbo.msaplayground.model.ChatMessage
 import com.mumulbo.msaplayground.service.RedisPublisher
 import com.mumulbo.msaplayground.service.MemberServiceClient
@@ -17,7 +18,7 @@ class ChatWebSocketHandler(
 ) : TextWebSocketHandler() {
 
     private val objectMapper = jacksonObjectMapper()
-
+    private val log = logger()
     override fun afterConnectionEstablished(session: WebSocketSession) {
         val userId = session.uri.query
             ?.split("&")
@@ -26,7 +27,7 @@ class ChatWebSocketHandler(
             ?.get("userId")
 
         if (userId.isNullOrBlank()) {
-            println("❌ X-User-Id 누락")
+            log.warn("❌ X-User-Id 누락")
             session.close(CloseStatus.POLICY_VIOLATION)
             return
         }
@@ -37,7 +38,7 @@ class ChatWebSocketHandler(
             session.attributes["nickname"] = member.nickname
             session.attributes["email"] = member.email
 
-            println("✅ WebSocket 연결 성공: ${session.id} (닉네임: ${member.nickname})")
+            log.info("✅ WebSocket 연결 성공: {} (닉네임: {})", session.id, member.nickname)
             sessionManager.add(session)
         } catch (e: Exception) {
             println("❌ 멤버 정보 조회 실패: ${e.message}")
@@ -50,7 +51,7 @@ class ChatWebSocketHandler(
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        println("📨 받은 메시지: ${message.payload}")
+        log.info("📨 받은 메시지: {}", message.payload)
 
         try {
             val chatMessage: ChatMessage = objectMapper.readValue(message.payload)
@@ -60,7 +61,7 @@ class ChatWebSocketHandler(
 
             redisPublisher.publish("chat-room:main", chatMessage)
         } catch (e: Exception) {
-            println("❌ 메시지 파싱 실패: ${e.message}")
+            log.error("❌ 메시지 파싱 실패: {}", e.message)
         }
     }
 

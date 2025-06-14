@@ -7,6 +7,7 @@ import com.mumulbo.msaplayground.repository.ChatMessageRepository
 import org.springframework.data.redis.connection.Message
 import org.springframework.data.redis.connection.MessageListener
 import org.springframework.stereotype.Service
+import com.mumulbo.msaplayground.common.logger
 
 @Service
 class RedisSubscriber(
@@ -15,9 +16,11 @@ class RedisSubscriber(
     private val chatMessageRepository: ChatMessageRepository
 ) : MessageListener {
 
+    private val log = logger()
+
     override fun onMessage(message: Message, pattern: ByteArray?) {
         val body = String(message.body)
-        println("📡 Redis에서 메시지 수신: $body")
+        log.info("📡 Redis에서 메시지 수신: {}", body)
 
         try {
             val chatMessage = objectMapper.readValue(body, ChatMessage::class.java)
@@ -29,7 +32,7 @@ class RedisSubscriber(
             sessionManager.broadcast(body)
 
         } catch (e: Exception) {
-            println("❌ RedisSubscriber 파싱/저장 실패: ${e.message}")
+            log.error("❌ RedisSubscriber 파싱/저장 실패", e)
         }
     }
 }
