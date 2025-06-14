@@ -2,7 +2,7 @@
 
 ## 🧠 Understanding the application with a diagram
 
-![w15.png](..%2F..%2F..%2FDownloads%2Fw15.png)
+![w15.png](docs%2Fw15.png)
 
 **Flow**:
 1. User connects to the Chat Service via WebSocket (`/ws/chat`).
