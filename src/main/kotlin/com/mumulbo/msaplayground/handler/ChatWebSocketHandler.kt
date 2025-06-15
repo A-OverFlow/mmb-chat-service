@@ -46,6 +46,9 @@ class ChatWebSocketHandler(
 
             log.info("[Chat-Service] WebSocket connection established - sessionId={}, nickname={}", session.id, member.nickname)
             sessionManager.add(session)
+
+            // 접속자 목록 브로드캐스트
+            broadcastUserListUpdate()
         } catch (e: Exception) {
             log.error("[Chat-Service] Failed to fetch member info - userId={}, error={}", userId, e.message, e)
             session.close(CloseStatus.SERVER_ERROR)
@@ -55,6 +58,9 @@ class ChatWebSocketHandler(
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         log.info("[Chat-Service] WebSocket connection closed - sessionId={}, status={}", session.id, status)
         sessionManager.remove(session)
+
+        //접속자 목록 실시간 전송
+        broadcastUserListUpdate()
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -123,6 +129,17 @@ class ChatWebSocketHandler(
         }
     }
 
+    private fun broadcastUserListUpdate() {
+        val connectedUserIds = sessionManager.getAllConnectedUserIds()
+
+        val updateMessage = ChatMessage(
+            type = MessageType.USER_LIST_UPDATE,
+            connectedUserList = connectedUserIds,
+            sentAt = LocalDateTime.now()
+        )
+
+        redisPublisher.publish("chat-room:main", updateMessage)
+    }
 
     private val WebSocketSession.headers: Map<String, List<String>>
         get() = (attributes["org.springframework.http.HttpHeaders"] as? Map<String, List<String>>)

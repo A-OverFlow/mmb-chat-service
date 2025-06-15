@@ -56,4 +56,10 @@ class WebSocketSessionManager {
             }
         }
     }
+
+    fun getAllConnectedUserIds(): List<Long> {
+        return sessions.values
+            .mapNotNull { it.attributes["userId"] as? Long }
+            .distinct()
+    }
 }

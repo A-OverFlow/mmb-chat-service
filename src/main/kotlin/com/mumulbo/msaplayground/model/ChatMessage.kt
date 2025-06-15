@@ -11,12 +11,13 @@ data class ChatMessage(
     val id: String? = null,
     var senderName: String? = null,
     var senderEmail: String? = null,
-    val message: String,
+    val message: String = "",
     val type: MessageType,
     val roomId: String = "main",
     var recipientUserId: Long? = null,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    val sentAt: LocalDateTime = LocalDateTime.now()
+    val sentAt: LocalDateTime = LocalDateTime.now(),
+    val connectedUserList: List<Long>? = null
 )
 
 enum class MessageType {
