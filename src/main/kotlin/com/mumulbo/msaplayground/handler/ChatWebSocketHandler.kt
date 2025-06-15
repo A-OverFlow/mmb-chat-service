@@ -1,23 +1,26 @@
 package com.mumulbo.msaplayground.handler
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mumulbo.msaplayground.common.logger
 import com.mumulbo.msaplayground.model.ChatMessage
+import com.mumulbo.msaplayground.model.MessageType
 import com.mumulbo.msaplayground.service.RedisPublisher
 import com.mumulbo.msaplayground.service.MemberServiceClient
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.*
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import java.time.LocalDateTime
 
 @Component
 class ChatWebSocketHandler(
+    private val objectMapper: ObjectMapper,
     private val redisPublisher: RedisPublisher,
     private val sessionManager: WebSocketSessionManager,
     private val memberServiceClient: MemberServiceClient,
 ) : TextWebSocketHandler() {
 
-    private val objectMapper = jacksonObjectMapper()
     private val log = logger()
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
@@ -37,6 +40,7 @@ class ChatWebSocketHandler(
 
         try {
             val member = memberServiceClient.getMemberInfo(userId.toLong())
+            session.attributes["userId"] = userId.toLong()
             session.attributes["nickname"] = member.nickname
             session.attributes["email"] = member.email
 
@@ -61,13 +65,64 @@ class ChatWebSocketHandler(
 
             chatMessage.senderName = session.attributes["nickname"] as? String ?: "unknown"
             chatMessage.senderEmail = session.attributes["email"] as? String ?: "unknown"
+            val senderId = session.attributes["userId"] as? Long ?: -1L
 
-            redisPublisher.publish("chat-room:main", chatMessage)
-            log.debug("[Chat-Service] Message published to Redis - sender={}, roomId={}", chatMessage.senderName, chatMessage.roomId)
+            when (chatMessage.type) {
+                MessageType.WHISPER -> {
+                    val recipientId = chatMessage.recipientUserId
+                    if (recipientId == null) {
+                        log.warn("[Chat-Service] Whisper ignored - recipientUserId is null (sessionId={})", session.id)
+                        return
+                    }
+
+                    // 자기 자신에게 귓속말 금지
+                    if (senderId == recipientId) {
+                        log.warn("[Chat-Service] Whisper blocked - sender tried to whisper to self (userId={})", senderId)
+
+                        val failMessage = ChatMessage(
+                            type = MessageType.WHISPER_FAILED,
+                            message = "귓속말 전송 실패: 자기 자신에게는 보낼 수 없습니다.",
+                            recipientUserId = recipientId,
+                            sentAt = LocalDateTime.now()
+                        )
+                        val failJson = objectMapper.writeValueAsString(failMessage)
+                        session.sendMessage(TextMessage(failJson))
+                        return
+                    }
+
+                    val targetSession = sessionManager.getSessionByUserId(recipientId)
+                    if (targetSession != null && targetSession.isOpen) {
+                        log.info("[Chat-Service] Whisper sent - fromUserId={}, toUserId={}, message={}", senderId, recipientId, chatMessage.message)
+
+                        val whisperJson = objectMapper.writeValueAsString(chatMessage)
+                        session.sendMessage(TextMessage(whisperJson))
+                        targetSession.sendMessage(TextMessage(whisperJson))
+
+                        redisPublisher.publish("chat-room:main", chatMessage)
+                    } else {
+                        log.warn("[Chat-Service] Whisper failed - target not found or closed (recipientUserId={})", recipientId)
+
+                        val failMessage = ChatMessage(
+                            type = MessageType.WHISPER_FAILED,
+                            message = "귓속말 전송 실패: 상대가 접속 중이 아닙니다.",
+                            recipientUserId = recipientId,
+                            sentAt = LocalDateTime.now()
+                        )
+                        val failJson = objectMapper.writeValueAsString(failMessage)
+                        session.sendMessage(TextMessage(failJson))
+                    }
+                }
+
+                else -> {
+                    redisPublisher.publish("chat-room:main", chatMessage)
+                    log.debug("[Chat-Service] Message published to Redis - sender={}, roomId={}", chatMessage.senderName, chatMessage.roomId)
+                }
+            }
         } catch (e: Exception) {
             log.error("[Chat-Service] Failed to parse incoming message - sessionId={}, error={}", session.id, e.message, e)
         }
     }
+
 
     private val WebSocketSession.headers: Map<String, List<String>>
         get() = (attributes["org.springframework.http.HttpHeaders"] as? Map<String, List<String>>)

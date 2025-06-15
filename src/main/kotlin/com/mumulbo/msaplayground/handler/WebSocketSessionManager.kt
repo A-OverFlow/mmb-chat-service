@@ -10,16 +10,37 @@ import java.util.concurrent.ConcurrentHashMap
 class WebSocketSessionManager {
 
     private val log = logger()
+
     private val sessions: MutableMap<String, WebSocketSession> = ConcurrentHashMap()
+    private val userIdToSessionId: MutableMap<Long, String> = ConcurrentHashMap()
 
     fun add(session: WebSocketSession) {
         sessions[session.id] = session
-        log.info("[Chat-Service] WebSocket session added - sessionId={}, totalSessions={}", session.id, sessions.size)
+
+        val userId = session.attributes["userId"] as? Long
+        if (userId != null) {
+            userIdToSessionId[userId] = session.id
+            log.info("[Chat-Service] WebSocket session added - sessionId={}, userId={}, totalSessions={}", session.id, userId, sessions.size)
+        } else {
+            log.warn("[Chat-Service] WebSocket session added without userId - sessionId={}, totalSessions={}", session.id, sessions.size)
+        }
     }
 
     fun remove(session: WebSocketSession) {
         sessions.remove(session.id)
-        log.info("[Chat-Service] WebSocket session removed - sessionId={}, totalSessions={}", session.id, sessions.size)
+
+        val userId = session.attributes["userId"] as? Long
+        if (userId != null) {
+            userIdToSessionId.remove(userId)
+            log.info("[Chat-Service] WebSocket session removed - sessionId={}, userId={}, totalSessions={}", session.id, userId, sessions.size)
+        } else {
+            log.warn("[Chat-Service] WebSocket session removed without userId - sessionId={}, totalSessions={}", session.id, sessions.size)
+        }
+    }
+
+    fun getSessionByUserId(userId: Long): WebSocketSession? {
+        val sessionId = userIdToSessionId[userId]
+        return sessionId?.let { sessions[it] }
     }
 
     fun broadcast(message: String) {

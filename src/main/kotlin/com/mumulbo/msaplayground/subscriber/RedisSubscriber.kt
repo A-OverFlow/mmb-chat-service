@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.Message
 import org.springframework.data.redis.connection.MessageListener
 import org.springframework.stereotype.Service
 import com.mumulbo.msaplayground.common.logger
+import com.mumulbo.msaplayground.model.MessageType
 
 @Service
 class RedisSubscriber(
@@ -29,11 +30,14 @@ class RedisSubscriber(
             chatMessageRepository.save(chatMessage)
             log.debug("[Chat-Service] ChatMessage saved to MongoDB - messageId={}", chatMessage.id)
 
-            sessionManager.broadcast(body)
-            log.debug("[Chat-Service] Broadcasted message to WebSocket clients")
+            if (chatMessage.type != MessageType.WHISPER) {
+                sessionManager.broadcast(body)
+                log.debug("[Chat-Service] Broadcasted message to WebSocket clients")
+            }
         } catch (e: Exception) {
             log.error("[Chat-Service] Failed to process Redis message - error={}", e.message, e)
         }
     }
+
 }
 
