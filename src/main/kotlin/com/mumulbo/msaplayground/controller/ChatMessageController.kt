@@ -22,7 +22,7 @@ class ChatMessageController(
     @GetMapping("/messages")
     fun getTextMessages(): ResponseEntity<List<ChatMessage>> {
         val messages = chatMessageRepository.findByType(MessageType.TEXT)
-            .sortedByDescending { it.sentAt }
+            .sortedBy { it.sentAt }
 
         return ResponseEntity.ok(messages)
     }
