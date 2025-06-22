@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 
 @Document(collection = "chat_messages")
 data class ChatMessage(
@@ -17,8 +16,8 @@ data class ChatMessage(
     val type: MessageType,
     val roomId: String = "main",
     var recipientUserId: Long? = null,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    val sentAt: ZonedDateTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")),
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    val sentAt: LocalDateTime = LocalDateTime.now(ZoneId.of("Asia/Seoul")),
     val connectedUserList: List<Long>? = null
 )
 
