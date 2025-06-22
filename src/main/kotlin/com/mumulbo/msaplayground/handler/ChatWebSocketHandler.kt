@@ -74,6 +74,11 @@ class ChatWebSocketHandler(
             val senderId = session.attributes["userId"] as? Long ?: -1L
 
             when (chatMessage.type) {
+                MessageType.PING -> {
+                    log.debug("[Chat-Service] Ignored PING message - sender={}", chatMessage.senderName)
+                    return
+                }
+
                 MessageType.WHISPER -> {
                     val recipientId = chatMessage.recipientUserId
                     if (recipientId == null) {

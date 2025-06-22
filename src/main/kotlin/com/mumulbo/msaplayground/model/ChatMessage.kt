@@ -27,5 +27,6 @@ enum class MessageType {
     SYSTEM,
     WHISPER,
     USER_LIST_UPDATE,
-    WHISPER_FAILED
+    WHISPER_FAILED,
+    PING
 }
