@@ -17,10 +17,10 @@ services:
       - mongo
       - redis-chat
     logging:
-      driver: json-file
-      options:
-          max-size: "10m"
-          max-file: "5"
+        driver: fluentd
+        options:
+            fluentd-address: localhost:24224
+            tag: mmb-chat-service
 
   db:
     image: mysql:8.0.36
